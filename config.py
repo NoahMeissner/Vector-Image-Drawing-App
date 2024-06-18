@@ -11,3 +11,7 @@ class PolygonOptions(Enum):
 class ObjectTypes(Enum):
     Line = 1,
     Rectangle = 2,
+
+
+CANVAS_WIDTH = 800
+CANVAS_HEIGHT = 600

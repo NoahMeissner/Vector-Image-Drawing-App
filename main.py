@@ -204,7 +204,7 @@ class GraphicalInterface:
 
     def draw_canvas(self, bol):
         if bol:
-            self.canvas = self.draw.draw_all(self.points, self.line_color, self.polygon_color, self.filter)
+            self.canvas = self.draw.re_draw(self.points, self.line_color, self.polygon_color, self.filter)
         else:
             self.canvas = self.draw.draw(self.points, self.line_color, self.polygon_color, self.filter)
 
