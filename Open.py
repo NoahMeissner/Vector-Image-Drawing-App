@@ -1,9 +1,12 @@
+# Noah Meißner 18.06.2024
 import json
 from Point import Point
 
 """
-This class handles the process of opening a JSON file and processing its data into an internal structure.
-It loads the JSON file, processes the data, and converts it into a list of Point objects with associated properties.
+This class handles the process of opening a JSON file and
+processing its data into an internal structure.
+It loads the JSON file, processes the data, and converts it
+into a list of Point objects with associated properties.
 """
 
 
@@ -13,7 +16,7 @@ def add_polygon(ls):
         if point.get_polygon() is not None:
             for i in range(0, index):
                 polygon = ls[i]
-                if point.get_polygon() == point.get_id():
+                if point.get_polygon() == polygon.get_id():
                     point.set_polygon(polygon)
                     break
         ls_final.append(point)

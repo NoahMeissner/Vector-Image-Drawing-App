@@ -1,10 +1,12 @@
+# Noah Meißner 18.06.2024
 import numpy as np
 
 """
-- This script defines functions for drawing a Bezier curve and generating points
-- along it using the De Casteljau's algorithm. It also includes an implementation
-of the Bresenham's line algorithm for efficient rasterization of the curve on
-a grid-based canvas.
+- This script defines functions for drawing a Bezier curve and
+generating points
+- along it using the De Casteljau's algorithm. It also includes
+an implementation of the Bresenham's line algorithm for efficient
+rasterization of the curve on a grid-based canvas.
 - Additionally, there is a function to calculate a bounding
 rectangle around a point or between two points.
 """
@@ -25,7 +27,6 @@ def de_casteljau(points, t):
 
 def bezier_curve(control_points, num_points=100):
     ls = [de_casteljau(control_points, t) for t in np.linspace(0, 1, num_points)]
-    print(ls)
     final = []
     for index in range(1, len(ls)):
         pre = ls[index - 1]
@@ -35,7 +36,7 @@ def bezier_curve(control_points, num_points=100):
 
 
 # https://www.roguebasin.com/index.php/Bresenham's_Line_Algorithm
-def bresenham_algorithm(start: tuple[int, int], end: tuple[int, int]) -> list[tuple[int, int]]:
+def bresenham_algorithm(start, end):
     x1, y1 = start
     x2, y2 = end
     dx = x2 - x1

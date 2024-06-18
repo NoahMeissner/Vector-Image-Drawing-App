@@ -1,11 +1,12 @@
+# Noah Meißner 18.06.2024
 import numpy as np
 import sys
 from config import PolygonOptions
+
 sys.setrecursionlimit(100000)
 
 
 class Polygon:
-
     def __init__(self, canvas, width, height):
         self.canvas = canvas
         self.width = width
@@ -38,10 +39,9 @@ class Polygon:
 
         return min_x, min_y, max_x, max_y
 
-    def draw_polygon(self, polygon, polygon_color, polgon_muster):
+    def draw_polygon(self, polygon, polygon_color, polygon_pattern):
         polygon = np.array(polygon)
         min_x, min_y, max_x, max_y = self.get_box(polygon)
-        print(min_x, min_y, max_x, max_y)
         mask = np.zeros((self.width, self.height), dtype=int)
 
         for point in polygon:
@@ -49,34 +49,71 @@ class Polygon:
             mask[x, y] = 1
 
         start = (min_x, min_y)
+        finish = self.fill4(start[0],
+                            start[1],
+                            mask,
+                            max_x,
+                            max_y,
+                            min_x,
+                            min_y)
 
-        finish = self.fill4(start[0], start[1], mask, max_x, max_y, min_x, min_y)
-
-        self.canvas = self.draw(finish, polgon_muster, polygon_color, min_x, min_y, max_x, max_y)
+        self.canvas = self.draw(finish,
+                                polygon_pattern,
+                                polygon_color,
+                                min_x,
+                                min_y,
+                                max_x,
+                                max_y)
 
         return self.canvas
 
-    def draw(self, arr, polygon_muster, color, min_x, min_y, max_x, max_y):
+    def draw(self, arr, polygon_pattern, color, min_x, min_y, max_x, max_y):
         rows, cols = arr.shape
-        if polygon_muster == PolygonOptions.horizontal:
+        if polygon_pattern == PolygonOptions.HORIZONTAL:
             for x in range(min_x, rows, 8):
                 for y in range(min_y, cols):
                     if arr[x, y] == 0:
-                        self.canvas = self.paint(x, y, max_y, min_y, min_x, max_x, color, arr)
-
-        elif polygon_muster == PolygonOptions.vertical:
+                        self.canvas = self.paint(x,
+                                                 y,
+                                                 max_y,
+                                                 min_y,
+                                                 min_x,
+                                                 max_x,
+                                                 color,
+                                                 arr)
+        elif polygon_pattern == PolygonOptions.VERTICAL:
             for x in range(rows):
                 for y in range(min_y, cols, 8):
-                    self.canvas = self.paint(x, y, max_y, min_y, min_x, max_x, color, arr)
-
-        elif polygon_muster == PolygonOptions.dot:
+                    self.canvas = self.paint(x,
+                                             y,
+                                             max_y,
+                                             min_y,
+                                             min_x,
+                                             max_x,
+                                             color,
+                                             arr)
+        elif polygon_pattern == PolygonOptions.DOT:
             for x in range(min_x, rows, 8):
                 for y in range(min_y, cols, 8):
-                    self.canvas = self.paint(x, y, max_y, min_y, min_x, max_x, color, arr)
-        elif polygon_muster == PolygonOptions.full:
+                    self.canvas = self.paint(x,
+                                             y,
+                                             max_y,
+                                             min_y,
+                                             min_x,
+                                             max_x,
+                                             color,
+                                             arr)
+        elif polygon_pattern == PolygonOptions.FULL:
             for x in range(min_x, rows):
                 for y in range(min_y, cols):
-                    self.canvas = self.paint(x, y, max_y, min_y, min_x, max_x, color, arr)
+                    self.canvas = self.paint(x,
+                                             y,
+                                             max_y,
+                                             min_y,
+                                             min_x,
+                                             max_x,
+                                             color,
+                                             arr)
 
         return self.canvas
 
@@ -92,16 +129,11 @@ class Polygon:
         if mask[x, y] == 0:
             mask[x, y] = 2
             if min_y <= y + 1 < max_y and mask[x, y + 1] != 1 and mask[x, y + 1] != 2:
-                y_new = y + 1
-                self.fill4(x, y_new, mask, max_x, max_y, min_x, min_y)
+                self.fill4(x, y + 1, mask, max_x, max_y, min_x, min_y)
             if min_y <= y - 1 < max_y and mask[x, y - 1] != 1 and mask[x, y - 1] != 2:
-                y_new = y - 1
-                self.fill4(x, y_new, mask, max_x, max_y, min_x, min_y)
-
+                self.fill4(x, y - 1, mask, max_x, max_y, min_x, min_y)
             if min_x <= x + 1 < max_x and mask[x + 1, y] != 1 and mask[x + 1, y] != 2:
-                x_new = x + 1
-                self.fill4(x_new, y, mask, max_x, max_y, min_x, min_y)
+                self.fill4(x + 1, y, mask, max_x, max_y, min_x, min_y)
             if min_x <= x - 1 < max_x and mask[x - 1, y] != 1 and mask[x - 1, y] != 2:
-                x_new = x - 1
-                self.fill4(x_new, y, mask, max_x, max_y, min_x, min_y)
+                self.fill4(x - 1, y, mask, max_x, max_y, min_x, min_y)
             return mask

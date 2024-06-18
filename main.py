@@ -1,3 +1,4 @@
+# Noah Meißner 18.06.2024
 from tkinter import *
 from Point import Point
 from CheckPoints import TriggerPoints
@@ -7,6 +8,15 @@ from Save import Save
 from tkinter import filedialog
 from Open import OpenFile
 from config import PolygonOptions, ObjectTypes
+
+"""
+This script implements a graphical user interface for a vector painter
+with the tkinter library. It enables the drawing, editing and saving
+of polygons and lines. Users can change the colours of the lines and polygons,
+ move the drawn shapes and empty the drawing area.
+The script uses several modules, including point and trigger point classes,
+ to support the functionality.
+"""
 
 
 def update_control_point(actual_point, pre_point):
@@ -33,7 +43,7 @@ def update_point(actual_point, list_point):
 class GraphicalInterface:
 
     def __init__(self):
-        self.filter = PolygonOptions.full
+        self.filter = PolygonOptions.FULL
         self.points = []
         self.control_points = []
         self.root = Tk(className='Vector Painter')
@@ -57,8 +67,10 @@ class GraphicalInterface:
 
         color_menu = Menu(menubar, tearoff=0)
         menubar.add_cascade(label="Color", menu=color_menu)
-        color_menu.add_command(label="Line Color", command=lambda: self.color_chooser(ObjectTypes.Line))
-        color_menu.add_command(label="Polygon Color", command=lambda: self.color_chooser(ObjectTypes.Rectangle))
+        color_menu.add_command(label="Line Color",
+                               command=lambda: self.color_chooser(ObjectTypes.LINE))
+        color_menu.add_command(label="Polygon Color",
+                               command=lambda: self.color_chooser(ObjectTypes.RECTANGLE))
 
         self.canvas = Canvas(self.root, width=500, height=500, bg="white")
         self.canvas.pack(fill=BOTH, expand=True)
@@ -85,7 +97,7 @@ class GraphicalInterface:
         self.draw_items()
 
     def color_chooser(self, obj):
-        if ObjectTypes.Line == obj:
+        if ObjectTypes.LINE == obj:
             color = self.line_color
         else:
             color = self.polygon_color
@@ -93,7 +105,7 @@ class GraphicalInterface:
         line_chooser = colorchooser.askcolor(title="Choose color", color=color)
         color = line_chooser[1]
 
-        if ObjectTypes.Line == obj:
+        if ObjectTypes.LINE == obj:
             self.line_color = color
         else:
             self.polygon_color = color
@@ -130,7 +142,8 @@ class GraphicalInterface:
                 control_point = point.get_control_point()
                 coord = control_point.get_coordinates()
                 control_point.set_coordinates((coord[0] + dx, coord[1] + dy))
-                point.set_control_point(control_point.get_x(), control_point.get_y())
+                point.set_control_point(control_point.get_x(),
+                                        control_point.get_y())
             coord = point.get_coordinates()
             point.set_coordinates((coord[0] + dx, coord[1] + dy))
             ls_final.append(point)
@@ -157,16 +170,17 @@ class GraphicalInterface:
         self.canvas.delete("all")
 
     def add_button_color(self, frame):
-        # Create a button widget
         button_frame = Frame(frame)
         button_frame.pack(pady=20)
 
-        button_full = Button(button_frame, text="FULL", command=lambda: self.on_button_click(PolygonOptions.full))
+        button_full = Button(button_frame, text="FULL",
+                             command=lambda: self.on_button_click(PolygonOptions.FULL))
         button_vertical = Button(button_frame, text="vertical",
-                                 command=lambda: self.on_button_click(PolygonOptions.vertical))
+                                 command=lambda: self.on_button_click(PolygonOptions.VERTICAL))
         button_horizontal = Button(button_frame, text="horizontal",
-                                   command=lambda: self.on_button_click(PolygonOptions.horizontal))
-        button_dot = Button(button_frame, text="Dot", command=lambda: self.on_button_click(PolygonOptions.dot))
+                                   command=lambda: self.on_button_click(PolygonOptions.HORIZONTAL))
+        button_dot = Button(button_frame, text="Dot",
+                            command=lambda: self.on_button_click(PolygonOptions.DOT))
 
         # Place the button in the main window
         button_full.pack(side=LEFT, padx=10)
@@ -187,7 +201,7 @@ class GraphicalInterface:
         trigger = TriggerPoints()
         point_trigger = trigger.painted_points(self.points, (event.x, event.y))
         bezier_trigger = trigger.bezier_points(self.points, (event.x, event.y))
-        if bezier_trigger == False and not self.edit:
+        if bezier_trigger is False and not self.edit:
             current_point = Point(event.x, event.y, len(self.points))
             if len(self.points) >= 1:
                 pre_point = self.points[-1]
@@ -195,7 +209,7 @@ class GraphicalInterface:
                 mid_y = int((pre_point.get_y() + current_point.get_y()) / 2)
                 current_point.set_control_point(mid_x, mid_y)
 
-            if point_trigger != False:
+            if point_trigger is not False:
                 current_point.set_polygon(point_trigger[1])
                 coordinates = point_trigger[1].get_coordinates()
                 current_point.set_coordinates(coordinates)
@@ -204,9 +218,17 @@ class GraphicalInterface:
 
     def draw_canvas(self, bol):
         if bol:
-            self.canvas = self.draw.re_draw(self.points, self.line_color, self.polygon_color, self.filter)
+            self.canvas = self.draw.re_draw(
+                self.points,
+                self.line_color,
+                self.polygon_color,
+                self.filter)
         else:
-            self.canvas = self.draw.draw(self.points, self.line_color, self.polygon_color, self.filter)
+            self.canvas = self.draw.draw(
+                self.points,
+                self.line_color,
+                self.polygon_color,
+                self.filter)
 
     def on_mouse_drag(self, event):
         trigger = TriggerPoints()

@@ -1,8 +1,11 @@
+# Noah Meißner 18.06.2024
 from LineAlgorithms import calculate_rectangle
 
 """
-The Point class represents a point in a 2D space with additional properties and methods.
-Each point has x and y coordinates, an ID, and can optionally be part of a Bezier curve or a polygon.
+The Point class represents a point in a 2D space
+with additional properties and methods.
+Each point has x and y coordinates, an ID, and can
+optionally be part of a Bezier curve or a polygon.
 The class also calculates the rectangular area that bounds the point.
 """
 
@@ -59,5 +62,4 @@ class Point:
 
     def get_rectangle(self):
         self.rectangle = self.calculate_rectangle()
-        print(f"rectangle: {self.rectangle}")
         return self.rectangle
