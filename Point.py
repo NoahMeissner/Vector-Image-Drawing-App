@@ -1,30 +1,34 @@
-from Calculate_Rectangle import Calculate_Rectangle
+from LineAlgorithms import calculate_rectangle
 
 """
-Diese Klasse behandelt jeden Punkt, welcher gezeichnet wurde
+The Point class represents a point in a 2D space with additional properties and methods.
+Each point has x and y coordinates, an ID, and can optionally be part of a Bezier curve or a polygon.
+The class also calculates the rectangular area that bounds the point.
 """
+
 
 class Point:
 
-    def __init__(self, x, y, id):
+    def __init__(self, x, y, id_code):
         self.x = x
         self.y = y
         self.point = None
         self.calculate_rectangle()
-        self.id = id
+        self.id = id_code
         self.bezier = False
         self.polygon = None
+        self.rectangle = None
 
-
-    def X(self):
+    def get_x(self):
         return self.x
-    def Y(self):
+
+    def get_y(self):
         return self.y
 
     def get_id(self):
         return self.id
 
-    def coordinates(self):
+    def get_coordinates(self):
         return [self.x, self.y]
 
     def set_coordinates(self, coordinates):
@@ -33,11 +37,10 @@ class Point:
         self.calculate_rectangle()
 
     def calculate_rectangle(self):
-        rect_obj = Calculate_Rectangle([self.x, self.y],None)
-        self.rectangle = rect_obj.calculate_rectangle_area()
+        return calculate_rectangle([self.x, self.y], None)
 
-    def set_control_Point(self, x,y):
-        self.point = Point(x,y,self.id)
+    def set_control_point(self, x, y):
+        self.point = Point(x, y, self.id)
 
     def set_bezier(self, bol):
         self.bezier = bol
@@ -51,11 +54,10 @@ class Point:
     def get_polygon(self):
         return self.polygon
 
-
-    def get_control_Point(self):
+    def get_control_point(self):
         return self.point
 
     def get_rectangle(self):
+        self.rectangle = self.calculate_rectangle()
+        print(f"rectangle: {self.rectangle}")
         return self.rectangle
-
-

@@ -1,38 +1,47 @@
 from tkinter import *
-import tkinter as tk
 from Point import Point
-from enum import Enum
-from Check_Trigger_Control_Points import TriggerPoints
+from CheckPoints import TriggerPoints
 from Draw import Draw
-from tkinter import Tk, Menu, Button, Canvas
-import numpy as np
+from tkinter import Tk, Menu, Button, Canvas, colorchooser
+from Save import Save
+from tkinter import filedialog
+from Open import OpenFile
+from config import PolygonOptions, ObjectTypes
 
 
-class Filter(Enum):
-    Full = 1,
-    Lines = 2,
-    ChessBoard = 3,
+def update_control_point(actual_point, pre_point):
+    if pre_point is not None:
+        mid_x = int((pre_point.get_x() + actual_point.get_x()) / 2)
+        mid_y = int((pre_point.get_y() + actual_point.get_y()) / 2)
+        actual_point.set_control_point(mid_x, mid_y)
+        return actual_point
+    else:
+        return actual_point
 
 
-class Object_Types(Enum):
-    Line = 1,
-    Rectangle = 2,
-    Circle = 3,
-    Refresh = 4
-
+def update_point(actual_point, list_point):
+    identification = actual_point.get_id()
+    list_final = []
+    for i in range(0, len(list_point)):
+        if identification == list_point[i].get_id():
+            list_final.append(actual_point)
+        else:
+            list_final.append(list_point[i])
+    return list_final
 
 
 class GraphicalInterface:
 
-
     def __init__(self):
+        self.filter = PolygonOptions.full
         self.points = []
         self.control_points = []
         self.root = Tk(className='Vector Painter')
         self.root.geometry("800x600")
         self.edit = False
+        self.current_line = None
+        self.ls_move = []
         menubar = Menu(self.root)
-
         self.line_color = 'blue'
         self.polygon_color = 'green'
 
@@ -42,18 +51,18 @@ class GraphicalInterface:
         menubar.add_cascade(label="File", menu=file_menu)
         file_menu.add_command(label="Open", command=lambda: self.open_image())
         file_menu.add_separator()
-        file_menu.add_command(label="Save", command=lambda: self.open_image())
+        file_menu.add_command(label="Save", command=lambda: self.save_image())
         file_menu.add_separator()
         file_menu.add_command(label="Exit", command=self.root.quit)
 
         color_menu = Menu(menubar, tearoff=0)
         menubar.add_cascade(label="Color", menu=color_menu)
-        color_menu.add_command(label="Choose Color", command=lambda: self.choose_color())
+        color_menu.add_command(label="Line Color", command=lambda: self.color_chooser(ObjectTypes.Line))
+        color_menu.add_command(label="Polygon Color", command=lambda: self.color_chooser(ObjectTypes.Rectangle))
 
         self.canvas = Canvas(self.root, width=500, height=500, bg="white")
         self.canvas.pack(fill=BOTH, expand=True)
         self.draw = Draw(self.canvas)
-
 
         # Bind mouse events to methods
         self.canvas.bind('<ButtonPress-1>', self.on_button_press)
@@ -63,57 +72,70 @@ class GraphicalInterface:
         self.root.bind('<KeyPress-c>', self.clear_canvas)
         self.canvas.bind('<ButtonRelease-1>', self.on_button_release)
         self.canvas.bind('<ButtonRelease-3>', self.move_release)
-
         self.canvas.bind('<B3-Motion>', self.on_mouse_wheel_button_press)
-        self.canvas.bind("<FocusIn>", self.on_focus_in)
-        self.ls_move = []
-
-        self.current_line = None
+        self.add_button_color(self.root)
 
         button_frame = Frame(self.root)
         button_frame.pack(pady=20)
 
-
-
-        button_line = Button(button_frame, text="Lines", command=lambda: self.on_button_click(Object_Types.Line))
-        button_rectangle = Button(button_frame, text="Rectangle",
-                                  command=lambda: self.on_button_click(Object_Types.Rectangle))
-        button_circle = Button(button_frame, text="Circle", command=lambda: self.on_button_click(Object_Types.Circle))
-        button_refresh = Button(button_frame, text="Refresh",
-                                command=lambda: self.on_button_click(Object_Types.Refresh))
-
-        # Place the button in the main window
-        button_line.pack(side=LEFT, padx=10)
-        button_rectangle.pack(side=LEFT, padx=10)
-        button_circle.pack(side=LEFT, padx=10)
-        button_refresh.pack(side=LEFT, padx=10)
-
         self.root.mainloop()
 
+    def on_button_click(self, filter_chosen):
+        self.filter = filter_chosen
+        self.draw_items()
+
+    def color_chooser(self, obj):
+        if ObjectTypes.Line == obj:
+            color = self.line_color
+        else:
+            color = self.polygon_color
+
+        line_chooser = colorchooser.askcolor(title="Choose color", color=color)
+        color = line_chooser[1]
+
+        if ObjectTypes.Line == obj:
+            self.line_color = color
+        else:
+            self.polygon_color = color
+        self.draw_items()
+
+    def save_image(self):
+        file_path = filedialog.asksaveasfilename(
+            defaultextension=".png",
+            filetypes=[("JSON", ".json")])
+        if file_path:
+            Save(self.points, file_path, self.line_color, self.polygon_color)
+
+    def open_image(self):
+        file_path = filedialog.askopenfilename()
+        try:
+            data = OpenFile(file_path)
+            self.line_color, self.polygon_color, self.points = data.get_data()
+            self.draw_items()
+
+        except Exception as e:
+            print("Open Process: " + str(e))
+
     def edit_mode(self, event):
+        print("Edit Mode")
         if self.edit:
             self.edit = False
         else:
             self.edit = True
 
-    def on_focus_in(self, event):
-        self.canvas.focus_set()
-
     def shift_canvas_points(self, dx, dy):
         ls_final = []
         for point in self.points:
-            control_point = None
-            if point.get_control_Point() is not None:
-                control_point = point.get_control_Point()
-                coord = control_point.coordinates()
+            if point.get_control_point() is not None:
+                control_point = point.get_control_point()
+                coord = control_point.get_coordinates()
                 control_point.set_coordinates((coord[0] + dx, coord[1] + dy))
-                point.set_control_Point(control_point.X(), control_point.Y())
-            coord = point.coordinates()
+                point.set_control_point(control_point.get_x(), control_point.get_y())
+            coord = point.get_coordinates()
             point.set_coordinates((coord[0] + dx, coord[1] + dy))
             ls_final.append(point)
         self.points = ls_final
-        self.clear_canvas(None)
-        self.draw_canvas(True)
+        self.draw_items()
 
     def on_mouse_wheel_button_press(self, event):
         if len(self.ls_move) > 1:
@@ -125,17 +147,8 @@ class GraphicalInterface:
         else:
             self.ls_move.append((event.x, event.y))
 
-
     def move_release(self, event):
         self.ls_move = []
-
-
-    #TODO Color Menu noch machen
-    def choose_color(self):
-        dialog = tk.Toplevel(self.root)
-        dialog.title("Color Input")
-        dialog.geometry("300x200")
-        self.add_button_color(dialog)
 
     def clear_canvas(self, event):
         if event is not None:
@@ -148,22 +161,20 @@ class GraphicalInterface:
         button_frame = Frame(frame)
         button_frame.pack(pady=20)
 
-        button_full = Button(button_frame, text="FULL", command=lambda: self.on_button_click(Filter.Full))
-        button_lines = Button(button_frame, text="LINES", command=lambda: self.on_button_click(Filter.Lines))
-        button_chess = Button(button_frame, text="CHESS Board", command=lambda: self.on_button_click(Filter.ChessBoard))
+        button_full = Button(button_frame, text="FULL", command=lambda: self.on_button_click(PolygonOptions.full))
+        button_vertical = Button(button_frame, text="vertical",
+                                 command=lambda: self.on_button_click(PolygonOptions.vertical))
+        button_horizontal = Button(button_frame, text="horizontal",
+                                   command=lambda: self.on_button_click(PolygonOptions.horizontal))
+        button_dot = Button(button_frame, text="Dot", command=lambda: self.on_button_click(PolygonOptions.dot))
 
         # Place the button in the main window
         button_full.pack(side=LEFT, padx=10)
-        button_lines.pack(side=LEFT, padx=10)
-        button_chess.pack(side=LEFT, padx=10)
-
-    def on_button_click(self, type):
-        if type == Object_Types.Refresh:
-            self.clear_canvas(None)
-        print(type)
+        button_vertical.pack(side=LEFT, padx=10)
+        button_dot.pack(side=LEFT, padx=10)
+        button_horizontal.pack(side=LEFT, padx=10)
 
     def on_x_press(self, event):
-        print("x press")
         self.clear_canvas(None)
         bol = self.draw.get_draw_control_points()
         if bol:
@@ -172,54 +183,30 @@ class GraphicalInterface:
             self.draw.set_draw_control_points(True)
         self.draw_canvas(True)
 
-
     def on_button_press(self, event):
-        radius = 1  # Radius des Punkts
-        # Save the starting point
         trigger = TriggerPoints()
-        point_trigger = trigger.painted_points(self.points,(event.x, event.y))
+        point_trigger = trigger.painted_points(self.points, (event.x, event.y))
         bezier_trigger = trigger.bezier_points(self.points, (event.x, event.y))
         if bezier_trigger == False and not self.edit:
             current_point = Point(event.x, event.y, len(self.points))
             if len(self.points) >= 1:
                 pre_point = self.points[-1]
-                mid_x = int((pre_point.X() + current_point.X()) / 2)
-                mid_y = int((pre_point.Y() + current_point.Y()) / 2)
-                current_point.set_control_Point(mid_x, mid_y)
-            print(current_point.coordinates())
+                mid_x = int((pre_point.get_x() + current_point.get_x()) / 2)
+                mid_y = int((pre_point.get_y() + current_point.get_y()) / 2)
+                current_point.set_control_point(mid_x, mid_y)
 
             if point_trigger != False:
                 current_point.set_polygon(point_trigger[1])
-                print("Polygon")
+                coordinates = point_trigger[1].get_coordinates()
+                current_point.set_coordinates(coordinates)
             self.points.append(current_point)
             self.draw_canvas(False)
-        else:
-            print("Bewegen")
 
     def draw_canvas(self, bol):
         if bol:
-            self.canvas = self.draw.draw_all(self.points, self.line_color, self.polygon_color)
+            self.canvas = self.draw.draw_all(self.points, self.line_color, self.polygon_color, self.filter)
         else:
-            self.canvas = self.draw.draw(self.points, self.line_color, self.polygon_color)
-
-    def update_point(self, actual_point, list_point):
-        id = actual_point.get_id()
-        list_final = []
-        for i in range(0,len(list_point)):
-            if id == list_point[i].get_id():
-                list_final.append(actual_point)
-            else:
-                list_final.append(list_point[i])
-        return list_final
-
-    def update_control_point(self, actual_point, pre_point):
-        if pre_point is not None:
-            mid_x = int((pre_point.X() + actual_point.X()) / 2)
-            mid_y = int((pre_point.Y() + actual_point.Y()) / 2)
-            actual_point.set_control_Point(mid_x, mid_y)
-            return actual_point
-        else:
-            return actual_point
+            self.canvas = self.draw.draw(self.points, self.line_color, self.polygon_color, self.filter)
 
     def on_mouse_drag(self, event):
         trigger = TriggerPoints()
@@ -227,31 +214,29 @@ class GraphicalInterface:
         bezier_trigger = trigger.bezier_points(self.points, (event.x, event.y))
 
         if bezier_trigger and self.edit:
-            print('Bezier Triggered')
             pre_point, post_point = bezier_trigger
-            post_point.set_control_Point(event.x, event.y)
+            post_point.set_control_point(event.x, event.y)
             post_point.set_bezier(True)
-            self.update_point(post_point,self.points)
-            self.clear_canvas(None)
-            self.draw_canvas(True)
-
+            update_point(post_point, self.points)
+            self.draw_items()
 
         if point_trigger and self.edit:
             pre_point, actual_point, post_point = point_trigger
             actual_point.set_coordinates([event.x, event.y])
             if pre_point is not None:
-                actual_point = self.update_control_point(actual_point, pre_point)
-                self.points = self.update_point(actual_point, self.points)
-            if post_point != None:
-                post_point = self.update_control_point(post_point, actual_point)
-                self.points = self.update_point(post_point, self.points)
-            self.clear_canvas(None)
-            self.draw_canvas(True)
-
-
+                actual_point = update_control_point(actual_point, pre_point)
+                self.points = update_point(actual_point, self.points)
+            if post_point is not None:
+                post_point = update_control_point(post_point, actual_point)
+                self.points = update_point(post_point, self.points)
+            self.draw_items()
 
     def on_button_release(self, event):
         self.current_line = None
+
+    def draw_items(self):
+        self.clear_canvas(None)
+        self.draw_canvas(True)
 
 
 if __name__ == '__main__':
