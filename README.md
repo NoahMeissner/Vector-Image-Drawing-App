@@ -11,7 +11,10 @@ https://github.com/NoahMeissner/Vector-Image-Drawing-App/assets/108337767/5b0303
 ### Control
 
 ### Usage:
-**Graphical Interface**: python3 main.py
+**Graphical Interface**: 
+'''
+python3 main.py
+'''
 
 
 ### Installation
