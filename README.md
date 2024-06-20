@@ -1,7 +1,8 @@
 ## Vector Image Drawing App
 
-Draw Simple Vector Graphics with Vector Drawing App. You can use a User Interface to draw Bezier Cuvres, Lines and Polygons. Save and Open filters withe ease for quick adjustments and refinements.
-All Functions are self implemented, w
+Easily draw Bézier curves, lines, and polygons using an intuitive user interface. Save and open your work seamlessly, allowing for quick adjustments and refinements.
+
+All functions are custom-implemented, leveraging the power of the NumPy and Tkinter libraries for efficient and interactive graphic creation.
 
 https://github.com/NoahMeissner/Vector-Image-Drawing-App/assets/108337767/5b030321-795a-4c49-b635-ae71a3b3a89a
 
