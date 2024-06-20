@@ -9,18 +9,23 @@ https://github.com/NoahMeissner/Vector-Image-Drawing-App/assets/108337767/5b0303
 **Bresenham's Algorithm:**
 - Used to draw lines by setting individual pixels in a straight path between two points with integer coordinates.
 - This algorithm ensures efficient and accurate rendering of lines, avoiding floating-point arithmetic.
+
 **De Casteljau's Algorithm:**
 - Employed to create segments of Bézier curves, which are used for smooth and scalable curve generation.
 - This recursive algorithm constructs Bézier curves by iteratively subdividing control points.
+
 **Flood Fill Algorithm:**
 - Applied to fill polygons or areas with a specified color by setting each pixel inside the boundary.
 - This algorithm is commonly used in paint programs and for boundary-defined color filling.
+
 **Tkinter for UI Elements:**
 - Tkinter is utilized to create and manage various user interface elements such as buttons, labels, and canvases.
 - This Python library allows for the creation of interactive and graphical applications.
+
 **Tkinter create_rectangle for Pixel Manipulation:**
 - Tkinter's create_rectangle method is used to set pixels individually to draw shapes and lines.
 - Unlike higher-level drawing functions like create_line, create_rectangle can be used to set each pixel's color manually.
+
 **NumPy for Pixel Matrices:**
 - NumPy is used to store and manipulate pixel matrices efficiently.
 - This library provides a convenient and powerful way to handle large arrays of pixel data for image processing.
